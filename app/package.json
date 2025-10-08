@@ -1,0 +1,19 @@
+{
+  "name": "@codex-account-record/app",
+  "version": "0.1.0",
+  "private": true,
+  "main": "src/index.tsx",
+  "scripts": {
+    "start": "expo start --clear",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "lint": "eslint --ext .ts,.tsx src",
+    "typecheck": "tsc --noEmit",
+    "test": "echo \"App 测试用例尚未实现\""
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "engines": {
+    "node": ">=18"
+  }
+}

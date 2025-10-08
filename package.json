@@ -1,0 +1,33 @@
+{
+  "name": "codex-account-record",
+  "version": "0.1.0",
+  "private": true,
+  "description": "个人记账应用的移动端与后端 monorepo 项目",
+  "license": "MIT",
+  "workspaces": [
+    "app",
+    "server",
+    "shared"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "lint": "npm run lint --workspaces",
+    "test": "npm run test --workspaces",
+    "format": "prettier --write .",
+    "prepare": "husky install"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "husky": "^9.0.11",
+    "lint-staged": "^15.2.2",
+    "prettier": "^3.2.5",
+    "typescript": "~5.3.3"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": "eslint --max-warnings=0",
+    "*.{js,jsx,ts,tsx,json,md,css,scss}": "prettier --write"
+  }
+}
