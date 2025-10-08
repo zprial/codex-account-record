@@ -1,0 +1,1621 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人记账应用 - 完整版</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8'
+                        },
+                        success: {
+                            50: '#f0fdf4',
+                            500: '#22c55e',
+                            600: '#16a34a'
+                        },
+                        danger: {
+                            50: '#fef2f2',
+                            500: '#ef4444',
+                            600: '#dc2626'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- 移动端容器 -->
+    <div class="max-w-sm mx-auto bg-white min-h-screen shadow-xl relative overflow-hidden">
+        
+        <!-- 顶部状态栏 -->
+        <div class="bg-gradient-to-r from-primary-600 to-primary-700 text-white px-4 py-2 text-sm flex justify-between items-center">
+            <span>9:41</span>
+            <div class="flex items-center space-x-1">
+                <i class="fas fa-signal text-xs"></i>
+                <i class="fas fa-wifi text-xs"></i>
+                <i class="fas fa-battery-three-quarters text-xs"></i>
+            </div>
+        </div>
+
+        <!-- 首页 -->
+        <div id="homePage" class="page active">
+            <!-- 头部导航 -->
+            <header class="bg-gradient-to-r from-primary-600 to-primary-700 text-white px-6 py-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h1 class="text-xl font-bold">记账助手</h1>
+                        <p class="text-primary-100 text-sm">智能记账，轻松理财</p>
+                    </div>
+                    <button class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center" onclick="navigateTo('profilePage')">
+                        <i class="fas fa-user text-lg"></i>
+                    </button>
+                </div>
+                
+                <!-- 月度概览卡片 -->
+                <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-4">
+                    <div class="text-center mb-3">
+                        <p class="text-primary-100 text-sm">2025年9月</p>
+                        <p class="text-2xl font-bold">¥ 2,847.50</p>
+                        <p class="text-primary-100 text-xs">本月结余</p>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <div class="text-center">
+                            <p class="text-success-300">收入</p>
+                            <p class="font-semibold">¥ 8,500</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-red-300">支出</p>
+                            <p class="font-semibold">¥ 5,652.50</p>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- 快速操作按钮 -->
+            <section class="px-6 py-4 -mt-6 relative z-10">
+                <div class="bg-white rounded-2xl shadow-lg p-4">
+                    <div class="grid grid-cols-3 gap-4">
+                        <button class="flex flex-col items-center p-3 rounded-xl bg-success-50 hover:bg-success-100 transition-colors" onclick="openAddModal('income')">
+                            <div class="w-12 h-12 bg-success-500 rounded-full flex items-center justify-center mb-2">
+                                <i class="fas fa-plus text-white text-lg"></i>
+                            </div>
+                            <span class="text-sm font-medium text-success-700">记收入</span>
+                        </button>
+                        
+                        <button class="flex flex-col items-center p-3 rounded-xl bg-danger-50 hover:bg-danger-100 transition-colors" onclick="openAddModal('expense')">
+                            <div class="w-12 h-12 bg-danger-500 rounded-full flex items-center justify-center mb-2">
+                                <i class="fas fa-minus text-white text-lg"></i>
+                            </div>
+                            <span class="text-sm font-medium text-danger-700">记支出</span>
+                        </button>
+                        
+                        <button class="flex flex-col items-center p-3 rounded-xl bg-primary-50 hover:bg-primary-100 transition-colors" onclick="openAiModal()">
+                            <div class="w-12 h-12 bg-primary-500 rounded-full flex items-center justify-center mb-2">
+                                <i class="fas fa-camera text-white text-lg"></i>
+                            </div>
+                            <span class="text-sm font-medium text-primary-700">拍照记账</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- AI智能输入 -->
+            <section class="px-6 py-2">
+                <button class="w-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl p-4 text-white" onclick="openAiModal()">
+                    <div class="flex items-center justify-between">
+                        <div class="text-left">
+                            <h3 class="font-semibold mb-1">AI智能记账</h3>
+                            <p class="text-sm text-purple-100">说话或输入文字，自动识别记账信息</p>
+                        </div>
+                        <div class="flex space-x-2">
+                            <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                                <i class="fas fa-microphone text-lg"></i>
+                            </div>
+                            <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                                <i class="fas fa-keyboard text-lg"></i>
+                            </div>
+                        </div>
+                    </div>
+                </button>
+            </section>
+
+            <!-- 最近交易 -->
+            <section class="px-6 py-4">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-semibold text-gray-800">最近交易</h2>
+                    <button class="text-primary-600 text-sm font-medium" onclick="navigateTo('transactionsPage')">查看全部</button>
+                </div>
+                
+                <div class="space-y-3">
+                    <!-- 交易记录项 -->
+                    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-shadow" onclick="showTransactionDetail('1')">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-12 h-12 bg-success-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-gift text-success-600"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-800">微信立减金</p>
+                                    <p class="text-sm text-gray-500">农业银行 • 今天 14:30</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-semibold text-success-600">+¥2.00</p>
+                                <p class="text-xs text-gray-400">收入</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-shadow" onclick="showTransactionDetail('2')">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-coffee text-orange-600"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-800">星巴克咖啡</p>
+                                    <p class="text-sm text-gray-500">支付宝 • 今天 10:15</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-semibold text-danger-600">-¥35.00</p>
+                                <p class="text-xs text-gray-400">餐饮</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-shadow" onclick="showTransactionDetail('3')">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-subway text-blue-600"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-800">地铁出行</p>
+                                    <p class="text-sm text-gray-500">交通卡 • 昨天 18:45</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-semibold text-danger-600">-¥4.00</p>
+                                <p class="text-xs text-gray-400">交通</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 统计快览 -->
+            <section class="px-6 py-4">
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">本月统计</h2>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <button class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 text-white text-left" onclick="navigateTo('statisticsPage')">
+                        <div class="flex items-center justify-between mb-2">
+                            <i class="fas fa-chart-pie text-xl"></i>
+                            <span class="text-xs bg-white/20 px-2 py-1 rounded-full">支出分析</span>
+                        </div>
+                        <p class="text-2xl font-bold">¥5,652</p>
+                        <p class="text-blue-100 text-sm">餐饮占比最高 32%</p>
+                    </button>
+                    
+                    <button class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-4 text-white text-left" onclick="navigateTo('statisticsPage')">
+                        <div class="flex items-center justify-between mb-2">
+                            <i class="fas fa-piggy-bank text-xl"></i>
+                            <span class="text-xs bg-white/20 px-2 py-1 rounded-full">预算执行</span>
+                        </div>
+                        <p class="text-2xl font-bold">75%</p>
+                        <p class="text-green-100 text-sm">还剩 ¥1,848 可用</p>
+                    </button>
+                </div>
+            </section>
+
+            <!-- 底部安全区域 -->
+            <div class="h-20"></div>
+        </div>
+
+        <!-- 交易明细页 -->
+        <div id="transactionsPage" class="page">
+            <!-- 头部导航 -->
+            <header class="bg-gradient-to-r from-primary-600 to-primary-700 text-white px-6 py-6">
+                <div class="flex items-center justify-between mb-4">
+                    <button class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center" onclick="navigateTo('homePage')">
+                        <i class="fas fa-arrow-left text-lg"></i>
+                    </button>
+                    <h1 class="text-xl font-bold">交易明细</h1>
+                    <button class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center" onclick="showFilterModal()">
+                        <i class="fas fa-filter text-lg"></i>
+                    </button>
+                </div>
+                
+                <!-- 筛选标签 -->
+                <div class="flex space-x-2 overflow-x-auto pb-2">
+                    <button class="px-4 py-2 bg-white/20 rounded-full text-sm whitespace-nowrap filter-tag active" data-filter="all">全部</button>
+                    <button class="px-4 py-2 bg-white/10 rounded-full text-sm whitespace-nowrap filter-tag" data-filter="income">收入</button>
+                    <button class="px-4 py-2 bg-white/10 rounded-full text-sm whitespace-nowrap filter-tag" data-filter="expense">支出</button>
+                    <button class="px-4 py-2 bg-white/10 rounded-full text-sm whitespace-nowrap filter-tag" data-filter="food">餐饮</button>
+                    <button class="px-4 py-2 bg-white/10 rounded-full text-sm whitespace-nowrap filter-tag" data-filter="transport">交通</button>
+                </div>
+            </header>
+
+            <!-- 交易列表 -->
+            <div class="px-6 py-4">
+                <!-- 日期分组 -->
+                <div class="mb-6">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-sm font-medium text-gray-500">今天</h3>
+                        <span class="text-sm text-gray-400">2笔交易</span>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-shadow" onclick="showTransactionDetail('1')">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-12 h-12 bg-success-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-gift text-success-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-800">微信立减金</p>
+                                        <p class="text-sm text-gray-500">农业银行 • 14:30</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="font-semibold text-success-600">+¥2.00</p>
+                                    <p class="text-xs text-gray-400">收入</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-shadow" onclick="showTransactionDetail('2')">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-coffee text-orange-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-800">星巴克咖啡</p>
+                                        <p class="text-sm text-gray-500">支付宝 • 10:15</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="font-semibold text-danger-600">-¥35.00</p>
+                                    <p class="text-xs text-gray-400">餐饮</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 昨天 -->
+                <div class="mb-6">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-sm font-medium text-gray-500">昨天</h3>
+                        <span class="text-sm text-gray-400">3笔交易</span>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-shadow" onclick="showTransactionDetail('3')">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-subway text-blue-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-800">地铁出行</p>
+                                        <p class="text-sm text-gray-500">交通卡 • 18:45</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="font-semibold text-danger-600">-¥4.00</p>
+                                    <p class="text-xs text-gray-400">交通</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-shadow" onclick="showTransactionDetail('4')">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-shopping-bag text-purple-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-800">淘宝购物</p>
+                                        <p class="text-sm text-gray-500">支付宝 • 15:20</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="font-semibold text-danger-600">-¥128.00</p>
+                                    <p class="text-xs text-gray-400">购物</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-shadow" onclick="showTransactionDetail('5')">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-briefcase text-green-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-800">工资收入</p>
+                                        <p class="text-sm text-gray-500">银行转账 • 09:00</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="font-semibold text-success-600">+¥8,500.00</p>
+                                    <p class="text-xs text-gray-400">工资</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 底部安全区域 -->
+            <div class="h-20"></div>
+        </div> 
+       <!-- 统计分析页 -->
+        <div id="statisticsPage" class="page">
+            <!-- 头部导航 -->
+            <header class="bg-gradient-to-r from-primary-600 to-primary-700 text-white px-6 py-6">
+                <div class="flex items-center justify-between mb-4">
+                    <button class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center" onclick="navigateTo('homePage')">
+                        <i class="fas fa-arrow-left text-lg"></i>
+                    </button>
+                    <h1 class="text-xl font-bold">统计分析</h1>
+                    <button class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                        <i class="fas fa-calendar text-lg"></i>
+                    </button>
+                </div>
+                
+                <!-- 时间选择器 -->
+                <div class="flex bg-white/10 backdrop-blur-sm rounded-2xl p-1">
+                    <button class="flex-1 py-2 px-4 rounded-xl bg-white/20 text-white font-medium transition-all time-filter active" data-period="month">本月</button>
+                    <button class="flex-1 py-2 px-4 rounded-xl text-white/70 font-medium transition-all time-filter" data-period="year">本年</button>
+                    <button class="flex-1 py-2 px-4 rounded-xl text-white/70 font-medium transition-all time-filter" data-period="custom">自定义</button>
+                </div>
+            </header>
+
+            <!-- 收支概览 -->
+            <section class="px-6 py-4 -mt-6 relative z-10">
+                <div class="bg-white rounded-2xl shadow-lg p-6">
+                    <h2 class="text-lg font-semibold text-gray-800 mb-4">2025年9月概览</h2>
+                    
+                    <div class="grid grid-cols-3 gap-4 mb-6">
+                        <div class="text-center">
+                            <p class="text-2xl font-bold text-success-600">¥8,500</p>
+                            <p class="text-sm text-gray-500">收入</p>
+                            <div class="flex items-center justify-center mt-1">
+                                <i class="fas fa-arrow-up text-success-500 text-xs mr-1"></i>
+                                <span class="text-xs text-success-500">+12%</span>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center">
+                            <p class="text-2xl font-bold text-danger-600">¥5,653</p>
+                            <p class="text-sm text-gray-500">支出</p>
+                            <div class="flex items-center justify-center mt-1">
+                                <i class="fas fa-arrow-down text-danger-500 text-xs mr-1"></i>
+                                <span class="text-xs text-danger-500">-8%</span>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center">
+                            <p class="text-2xl font-bold text-primary-600">¥2,847</p>
+                            <p class="text-sm text-gray-500">结余</p>
+                            <div class="flex items-center justify-center mt-1">
+                                <i class="fas fa-arrow-up text-primary-500 text-xs mr-1"></i>
+                                <span class="text-xs text-primary-500">+35%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 趋势图 -->
+                    <div class="mb-4">
+                        <h3 class="text-sm font-medium text-gray-700 mb-3">收支趋势</h3>
+                        <div class="h-32 bg-gray-50 rounded-xl flex items-center justify-center">
+                            <canvas id="trendChart" width="300" height="120"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 支出分析 -->
+            <section class="px-6 py-4">
+                <div class="bg-white rounded-2xl shadow-lg p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-semibold text-gray-800">支出分析</h2>
+                        <span class="text-sm text-gray-500">本月</span>
+                    </div>
+
+                    <!-- 饼图 -->
+                    <div class="flex items-center justify-center mb-6">
+                        <div class="relative w-40 h-40">
+                            <canvas id="expenseChart" width="160" height="160"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- 分类详情 -->
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between p-3 bg-orange-50 rounded-xl">
+                            <div class="flex items-center">
+                                <div class="w-4 h-4 bg-orange-500 rounded-full mr-3"></div>
+                                <div>
+                                    <p class="font-medium text-gray-800">餐饮</p>
+                                    <p class="text-sm text-gray-500">32% • 15笔</p>
+                                </div>
+                            </div>
+                            <p class="font-semibold text-gray-800">¥1,809</p>
+                        </div>
+
+                        <div class="flex items-center justify-between p-3 bg-blue-50 rounded-xl">
+                            <div class="flex items-center">
+                                <div class="w-4 h-4 bg-blue-500 rounded-full mr-3"></div>
+                                <div>
+                                    <p class="font-medium text-gray-800">交通</p>
+                                    <p class="text-sm text-gray-500">18% • 22笔</p>
+                                </div>
+                            </div>
+                            <p class="font-semibold text-gray-800">¥1,018</p>
+                        </div>
+
+                        <div class="flex items-center justify-between p-3 bg-purple-50 rounded-xl">
+                            <div class="flex items-center">
+                                <div class="w-4 h-4 bg-purple-500 rounded-full mr-3"></div>
+                                <div>
+                                    <p class="font-medium text-gray-800">购物</p>
+                                    <p class="text-sm text-gray-500">25% • 8笔</p>
+                                </div>
+                            </div>
+                            <p class="font-semibold text-gray-800">¥1,413</p>
+                        </div>
+
+                        <div class="flex items-center justify-between p-3 bg-green-50 rounded-xl">
+                            <div class="flex items-center">
+                                <div class="w-4 h-4 bg-green-500 rounded-full mr-3"></div>
+                                <div>
+                                    <p class="font-medium text-gray-800">娱乐</p>
+                                    <p class="text-sm text-gray-500">15% • 6笔</p>
+                                </div>
+                            </div>
+                            <p class="font-semibold text-gray-800">¥848</p>
+                        </div>
+
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                            <div class="flex items-center">
+                                <div class="w-4 h-4 bg-gray-500 rounded-full mr-3"></div>
+                                <div>
+                                    <p class="font-medium text-gray-800">其他</p>
+                                    <p class="text-sm text-gray-500">10% • 4笔</p>
+                                </div>
+                            </div>
+                            <p class="font-semibold text-gray-800">¥565</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 预算执行情况 -->
+            <section class="px-6 py-4">
+                <div class="bg-white rounded-2xl shadow-lg p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-semibold text-gray-800">预算执行</h2>
+                        <button class="text-primary-600 text-sm font-medium" onclick="navigateTo('budgetPage')">设置预算</button>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div class="p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-xl border border-green-200">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-medium text-green-800">餐饮预算</span>
+                                <span class="text-sm text-green-600">75% 已用</span>
+                            </div>
+                            <div class="w-full h-3 bg-green-200 rounded-full mb-2">
+                                <div class="w-3/4 h-3 bg-green-500 rounded-full"></div>
+                            </div>
+                            <div class="flex justify-between text-sm text-green-700">
+                                <span>已用 ¥1,809</span>
+                                <span>预算 ¥2,400</span>
+                            </div>
+                        </div>
+
+                        <div class="p-4 bg-gradient-to-r from-yellow-50 to-yellow-100 rounded-xl border border-yellow-200">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-medium text-yellow-800">购物预算</span>
+                                <span class="text-sm text-yellow-600">94% 已用</span>
+                            </div>
+                            <div class="w-full h-3 bg-yellow-200 rounded-full mb-2">
+                                <div class="w-11/12 h-3 bg-yellow-500 rounded-full"></div>
+                            </div>
+                            <div class="flex justify-between text-sm text-yellow-700">
+                                <span>已用 ¥1,413</span>
+                                <span>预算 ¥1,500</span>
+                            </div>
+                        </div>
+
+                        <div class="p-4 bg-gradient-to-r from-red-50 to-red-100 rounded-xl border border-red-200">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-medium text-red-800">娱乐预算</span>
+                                <span class="text-sm text-red-600">106% 超支</span>
+                            </div>
+                            <div class="w-full h-3 bg-red-200 rounded-full mb-2">
+                                <div class="w-full h-3 bg-red-500 rounded-full"></div>
+                            </div>
+                            <div class="flex justify-between text-sm text-red-700">
+                                <span>已用 ¥848</span>
+                                <span>预算 ¥800</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 底部安全区域 -->
+            <div class="h-20"></div>
+        </div>
+
+        <!-- 预算管理页 -->
+        <div id="budgetPage" class="page">
+            <!-- 头部导航 -->
+            <header class="bg-gradient-to-r from-primary-600 to-primary-700 text-white px-6 py-6">
+                <div class="flex items-center justify-between mb-4">
+                    <button class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center" onclick="navigateTo('statisticsPage')">
+                        <i class="fas fa-arrow-left text-lg"></i>
+                    </button>
+                    <h1 class="text-xl font-bold">预算管理</h1>
+                    <button class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center" onclick="showAddBudgetModal()">
+                        <i class="fas fa-plus text-lg"></i>
+                    </button>
+                </div>
+                
+                <!-- 总预算概览 -->
+                <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-4">
+                    <div class="text-center mb-3">
+                        <p class="text-primary-100 text-sm">本月总预算</p>
+                        <p class="text-2xl font-bold">¥4,700</p>
+                        <p class="text-primary-100 text-xs">已用 ¥4,070 (87%)</p>
+                    </div>
+                    <div class="w-full h-2 bg-white/20 rounded-full">
+                        <div class="w-5/6 h-2 bg-white rounded-full"></div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- 预算列表 -->
+            <div class="px-6 py-4 -mt-6 relative z-10">
+                <div class="space-y-4">
+                    <!-- 餐饮预算 -->
+                    <div class="bg-white rounded-2xl shadow-lg p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mr-3">
+                                    <i class="fas fa-utensils text-orange-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold text-gray-800">餐饮预算</h3>
+                                    <p class="text-sm text-gray-500">本月预算</p>
+                                </div>
+                            </div>
+                            <button class="text-primary-600" onclick="editBudget('food')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <div class="flex justify-between text-sm text-gray-600 mb-2">
+                                <span>已用 ¥1,809</span>
+                                <span>预算 ¥2,400</span>
+                            </div>
+                            <div class="w-full h-3 bg-gray-200 rounded-full">
+                                <div class="w-3/4 h-3 bg-green-500 rounded-full"></div>
+                            </div>
+                            <p class="text-sm text-green-600 mt-2">还剩 ¥591 可用</p>
+                        </div>
+                        
+                        <div class="flex justify-between text-xs text-gray-500">
+                            <span>15笔交易</span>
+                            <span>75% 已用</span>
+                        </div>
+                    </div>
+
+                    <!-- 购物预算 -->
+                    <div class="bg-white rounded-2xl shadow-lg p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                                    <i class="fas fa-shopping-bag text-purple-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold text-gray-800">购物预算</h3>
+                                    <p class="text-sm text-gray-500">本月预算</p>
+                                </div>
+                            </div>
+                            <button class="text-primary-600" onclick="editBudget('shopping')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <div class="flex justify-between text-sm text-gray-600 mb-2">
+                                <span>已用 ¥1,413</span>
+                                <span>预算 ¥1,500</span>
+                            </div>
+                            <div class="w-full h-3 bg-gray-200 rounded-full">
+                                <div class="w-11/12 h-3 bg-yellow-500 rounded-full"></div>
+                            </div>
+                            <p class="text-sm text-yellow-600 mt-2">还剩 ¥87 可用</p>
+                        </div>
+                        
+                        <div class="flex justify-between text-xs text-gray-500">
+                            <span>8笔交易</span>
+                            <span>94% 已用</span>
+                        </div>
+                    </div>
+
+                    <!-- 娱乐预算 -->
+                    <div class="bg-white rounded-2xl shadow-lg p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                                    <i class="fas fa-gamepad text-green-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold text-gray-800">娱乐预算</h3>
+                                    <p class="text-sm text-gray-500">本月预算</p>
+                                </div>
+                            </div>
+                            <button class="text-primary-600" onclick="editBudget('entertainment')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <div class="flex justify-between text-sm text-gray-600 mb-2">
+                                <span>已用 ¥848</span>
+                                <span>预算 ¥800</span>
+                            </div>
+                            <div class="w-full h-3 bg-gray-200 rounded-full">
+                                <div class="w-full h-3 bg-red-500 rounded-full"></div>
+                            </div>
+                            <p class="text-sm text-red-600 mt-2">超支 ¥48</p>
+                        </div>
+                        
+                        <div class="flex justify-between text-xs text-gray-500">
+                            <span>6笔交易</span>
+                            <span>106% 超支</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 底部安全区域 -->
+            <div class="h-20"></div>
+        </div>
+
+        <!-- 个人中心页 -->
+        <div id="profilePage" class="page">
+            <!-- 头部导航 -->
+            <header class="bg-gradient-to-r from-primary-600 to-primary-700 text-white px-6 py-6">
+                <div class="flex items-center justify-between mb-4">
+                    <button class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center" onclick="navigateTo('homePage')">
+                        <i class="fas fa-arrow-left text-lg"></i>
+                    </button>
+                    <h1 class="text-xl font-bold">个人中心</h1>
+                    <button class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                        <i class="fas fa-cog text-lg"></i>
+                    </button>
+                </div>
+                
+                <!-- 用户信息 -->
+                <div class="flex items-center space-x-4">
+                    <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+                        <i class="fas fa-user text-2xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold">张三</h2>
+                        <p class="text-primary-100">记账达人 • 已记账 128 天</p>
+                    </div>
+                </div>
+            </header>
+
+            <!-- 统计卡片 -->
+            <section class="px-6 py-4 -mt-6 relative z-10">
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="bg-white rounded-xl p-4 text-center shadow-sm">
+                        <p class="text-2xl font-bold text-primary-600">128</p>
+                        <p class="text-sm text-gray-500">记账天数</p>
+                    </div>
+                    <div class="bg-white rounded-xl p-4 text-center shadow-sm">
+                        <p class="text-2xl font-bold text-success-600">1,247</p>
+                        <p class="text-sm text-gray-500">总交易数</p>
+                    </div>
+                    <div class="bg-white rounded-xl p-4 text-center shadow-sm">
+                        <p class="text-2xl font-bold text-orange-600">¥28.5K</p>
+                        <p class="text-sm text-gray-500">累计结余</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 功能菜单 -->
+            <section class="px-6 py-4">
+                <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+                    <div class="divide-y divide-gray-100">
+                        <button class="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors" onclick="showAccountSettings()">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                    <i class="fas fa-credit-card text-blue-600"></i>
+                                </div>
+                                <span class="font-medium text-gray-800">账户管理</span>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </button>
+
+                        <button class="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors" onclick="showDataBackup()">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                                    <i class="fas fa-cloud text-green-600"></i>
+                                </div>
+                                <span class="font-medium text-gray-800">数据备份</span>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </button>
+
+                        <button class="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors" onclick="showExportData()">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                                    <i class="fas fa-download text-purple-600"></i>
+                                </div>
+                                <span class="font-medium text-gray-800">导出数据</span>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </button>
+
+                        <button class="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors" onclick="showPrivacySettings()">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center mr-3">
+                                    <i class="fas fa-shield-alt text-orange-600"></i>
+                                </div>
+                                <span class="font-medium text-gray-800">隐私设置</span>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </button>
+
+                        <button class="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors" onclick="showAbout()">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mr-3">
+                                    <i class="fas fa-info-circle text-gray-600"></i>
+                                </div>
+                                <span class="font-medium text-gray-800">关于应用</span>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 底部安全区域 -->
+            <div class="h-20"></div>
+        </div>   
+     <!-- 底部导航 -->
+        <nav class="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-sm bg-white border-t border-gray-200 z-40">
+            <div class="flex justify-around py-2">
+                <button class="flex flex-col items-center py-2 px-4 nav-item active" data-page="homePage">
+                    <i class="fas fa-home text-xl mb-1"></i>
+                    <span class="text-xs font-medium">首页</span>
+                </button>
+                
+                <button class="flex flex-col items-center py-2 px-4 nav-item" data-page="transactionsPage">
+                    <i class="fas fa-list text-xl mb-1"></i>
+                    <span class="text-xs">明细</span>
+                </button>
+                
+                <button class="flex flex-col items-center py-2 px-4 nav-item relative" onclick="openAddModal('expense')">
+                    <div class="w-12 h-12 bg-primary-600 rounded-full flex items-center justify-center -mt-6 shadow-lg">
+                        <i class="fas fa-plus text-white text-xl"></i>
+                    </div>
+                    <span class="text-xs mt-1">记账</span>
+                </button>
+                
+                <button class="flex flex-col items-center py-2 px-4 nav-item" data-page="statisticsPage">
+                    <i class="fas fa-chart-bar text-xl mb-1"></i>
+                    <span class="text-xs">统计</span>
+                </button>
+                
+                <button class="flex flex-col items-center py-2 px-4 nav-item" data-page="profilePage">
+                    <i class="fas fa-user text-xl mb-1"></i>
+                    <span class="text-xs">我的</span>
+                </button>
+            </div>
+        </nav>
+
+        <!-- 添加记账弹窗 -->
+        <div id="addTransactionModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden">
+            <div class="flex items-end justify-center min-h-screen">
+                <div class="bg-white rounded-t-3xl w-full max-w-sm transform transition-transform duration-300 translate-y-full" id="modalContent">
+                    <div class="p-6">
+                        <!-- 弹窗头部 -->
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-xl font-bold text-gray-800">添加交易</h3>
+                            <button id="closeModal" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-times text-gray-600"></i>
+                            </button>
+                        </div>
+
+                        <!-- 收入/支出切换 -->
+                        <div class="flex bg-gray-100 rounded-xl p-1 mb-6">
+                            <button class="flex-1 py-3 px-4 rounded-lg bg-white shadow-sm font-medium text-gray-800 transition-all" id="expenseTab">
+                                <i class="fas fa-minus text-danger-500 mr-2"></i>支出
+                            </button>
+                            <button class="flex-1 py-3 px-4 rounded-lg font-medium text-gray-500 transition-all" id="incomeTab">
+                                <i class="fas fa-plus text-success-500 mr-2"></i>收入
+                            </button>
+                        </div>
+
+                        <!-- 金额输入 -->
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">金额</label>
+                            <div class="relative">
+                                <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-2xl font-bold text-gray-400">¥</span>
+                                <input type="number" placeholder="0.00" class="w-full pl-12 pr-4 py-4 text-2xl font-bold bg-gray-50 rounded-xl border-0 focus:ring-2 focus:ring-primary-500 focus:bg-white transition-all" id="amountInput">
+                            </div>
+                        </div>
+
+                        <!-- 分类选择 -->
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-3">分类</label>
+                            <div class="grid grid-cols-4 gap-3" id="categoryGrid">
+                                <!-- 动态生成分类按钮 -->
+                            </div>
+                        </div>
+
+                        <!-- 支付方式 -->
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-3">支付方式</label>
+                            <div class="grid grid-cols-3 gap-3">
+                                <button class="flex items-center p-3 rounded-xl bg-green-50 border-2 border-transparent hover:border-green-200 transition-all payment-btn" data-payment="微信">
+                                    <i class="fab fa-weixin text-green-500 text-xl mr-2"></i>
+                                    <span class="text-sm font-medium text-green-700">微信</span>
+                                </button>
+                                <button class="flex items-center p-3 rounded-xl bg-blue-50 border-2 border-transparent hover:border-blue-200 transition-all payment-btn" data-payment="支付宝">
+                                    <i class="fas fa-mobile-alt text-blue-500 text-xl mr-2"></i>
+                                    <span class="text-sm font-medium text-blue-700">支付宝</span>
+                                </button>
+                                <button class="flex items-center p-3 rounded-xl bg-gray-50 border-2 border-transparent hover:border-gray-200 transition-all payment-btn" data-payment="银行卡">
+                                    <i class="fas fa-credit-card text-gray-500 text-xl mr-2"></i>
+                                    <span class="text-sm font-medium text-gray-700">银行卡</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 备注 -->
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">备注</label>
+                            <input type="text" placeholder="添加备注..." class="w-full px-4 py-3 bg-gray-50 rounded-xl border-0 focus:ring-2 focus:ring-primary-500 focus:bg-white transition-all" id="noteInput">
+                        </div>
+
+                        <!-- 保存按钮 -->
+                        <button class="w-full py-4 bg-gradient-to-r from-primary-600 to-primary-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all" onclick="saveTransaction()">
+                            保存交易记录
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI智能输入弹窗 -->
+        <div id="aiInputModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden">
+            <div class="flex items-center justify-center min-h-screen p-4">
+                <div class="bg-white rounded-3xl w-full max-w-sm p-6 transform transition-transform duration-300 scale-95" id="aiModalContent">
+                    <div class="text-center mb-6">
+                        <div class="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-robot text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">AI智能记账</h3>
+                        <p class="text-gray-600 text-sm">说出或输入您的交易信息，AI将自动识别并填充</p>
+                    </div>
+
+                    <!-- 语音输入区域 -->
+                    <div class="mb-6">
+                        <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 text-center mb-4">
+                            <button id="voiceBtn" class="w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg hover:shadow-xl transition-all">
+                                <i class="fas fa-microphone text-white text-2xl"></i>
+                            </button>
+                            <p class="text-gray-600 text-sm">点击开始语音输入</p>
+                            <div id="voiceStatus" class="hidden">
+                                <div class="flex justify-center items-center mt-4">
+                                    <div class="w-2 h-2 bg-red-500 rounded-full animate-pulse mr-2"></div>
+                                    <span class="text-red-500 text-sm font-medium">正在录音...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 文字输入区域 -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">或者直接输入文字</label>
+                        <textarea placeholder="例如：支付宝买咖啡35元" rows="3" class="w-full px-4 py-3 bg-gray-50 rounded-xl border-0 focus:ring-2 focus:ring-purple-500 focus:bg-white transition-all resize-none" id="aiTextInput"></textarea>
+                    </div>
+
+                    <!-- AI解析结果 -->
+                    <div id="aiResult" class="hidden mb-6">
+                        <div class="bg-green-50 rounded-xl p-4 border border-green-200">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                <span class="text-sm font-medium text-green-700">AI识别结果</span>
+                            </div>
+                            <div class="space-y-2 text-sm" id="aiResultContent">
+                                <!-- 动态生成解析结果 -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 按钮组 -->
+                    <div class="flex space-x-3">
+                        <button id="closeAiModal" class="flex-1 py-3 px-4 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-all">
+                            取消
+                        </button>
+                        <button id="parseBtn" class="flex-1 py-3 px-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-medium rounded-xl hover:shadow-lg transition-all">
+                            解析
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 交易详情弹窗 -->
+        <div id="transactionDetailModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden">
+            <div class="flex items-center justify-center min-h-screen p-4">
+                <div class="bg-white rounded-3xl w-full max-w-sm p-6 transform transition-transform duration-300 scale-95" id="detailModalContent">
+                    <div class="text-center mb-6">
+                        <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-coffee text-orange-600 text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">星巴克咖啡</h3>
+                        <p class="text-3xl font-bold text-danger-600 mb-1">-¥35.00</p>
+                        <p class="text-gray-500 text-sm">今天 10:15</p>
+                    </div>
+
+                    <!-- 交易详情 -->
+                    <div class="space-y-4 mb-6">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">分类</span>
+                            <span class="font-medium">餐饮</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">支付方式</span>
+                            <span class="font-medium">支付宝</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">备注</span>
+                            <span class="font-medium">下午茶时光</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">记录时间</span>
+                            <span class="font-medium">2025-09-29 10:15</span>
+                        </div>
+                    </div>
+
+                    <!-- 按钮组 -->
+                    <div class="flex space-x-3">
+                        <button id="closeDetailModal" class="flex-1 py-3 px-4 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-all">
+                            关闭
+                        </button>
+                        <button class="flex-1 py-3 px-4 bg-primary-600 text-white font-medium rounded-xl hover:bg-primary-700 transition-all">
+                            编辑
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 成功提示 -->
+        <div id="successToast" class="fixed top-20 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-xl shadow-lg z-50 hidden">
+            <div class="flex items-center">
+                <i class="fas fa-check-circle mr-2"></i>
+                <span id="toastMessage">操作成功！</span>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+            background: #f9fafb;
+        }
+        
+        .page.active {
+            transform: translateX(0);
+        }
+        
+        .page.prev {
+            transform: translateX(-100%);
+        }
+        
+        .nav-item {
+            color: #9ca3af;
+            transition: color 0.2s;
+        }
+        
+        .nav-item.active {
+            color: #2563eb;
+        }
+        
+        .filter-tag.active {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .time-filter.active {
+            background: rgba(255, 255, 255, 0.2);
+        }
+    </style> 
+   <script>
+        // 全局变量
+        let currentPage = 'homePage';
+        let currentTransactionType = 'expense';
+        let selectedCategory = '';
+        let selectedPayment = '';
+        let isRecording = false;
+
+        // 页面导航
+        function navigateTo(pageId) {
+            const currentPageEl = document.getElementById(currentPage);
+            const targetPageEl = document.getElementById(pageId);
+            
+            if (currentPageEl && targetPageEl) {
+                currentPageEl.classList.remove('active');
+                currentPageEl.classList.add('prev');
+                
+                setTimeout(() => {
+                    currentPageEl.classList.remove('prev');
+                    targetPageEl.classList.add('active');
+                    currentPage = pageId;
+                    updateNavigation();
+                }, 150);
+            }
+        }
+
+        // 更新底部导航状态
+        function updateNavigation() {
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.dataset.page === currentPage) {
+                    item.classList.add('active');
+                }
+            });
+        }
+
+        // 底部导航点击事件
+        document.querySelectorAll('.nav-item[data-page]').forEach(item => {
+            item.addEventListener('click', () => {
+                const targetPage = item.dataset.page;
+                if (targetPage !== currentPage) {
+                    navigateTo(targetPage);
+                }
+            });
+        });
+
+        // 按钮点击效果
+        document.querySelectorAll('button').forEach(button => {
+            button.addEventListener('click', function() {
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 150);
+            });
+        });
+
+        // 添加记账弹窗控制
+        function openAddModal(type = 'expense') {
+            const modal = document.getElementById('addTransactionModal');
+            const modalContent = document.getElementById('modalContent');
+            
+            currentTransactionType = type;
+            updateTransactionType();
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modalContent.classList.remove('translate-y-full');
+            }, 10);
+        }
+
+        function closeAddModal() {
+            const modal = document.getElementById('addTransactionModal');
+            const modalContent = document.getElementById('modalContent');
+            
+            modalContent.classList.add('translate-y-full');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                resetForm();
+            }, 300);
+        }
+
+        // 重置表单
+        function resetForm() {
+            document.getElementById('amountInput').value = '';
+            document.getElementById('noteInput').value = '';
+            selectedCategory = '';
+            selectedPayment = '';
+            
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('border-primary-500', 'bg-primary-50');
+            });
+            
+            document.querySelectorAll('.payment-btn').forEach(btn => {
+                btn.classList.remove('border-primary-500', 'bg-primary-50');
+            });
+        }
+
+        // 更新交易类型
+        function updateTransactionType() {
+            const expenseTab = document.getElementById('expenseTab');
+            const incomeTab = document.getElementById('incomeTab');
+            
+            if (currentTransactionType === 'expense') {
+                expenseTab.classList.add('bg-white', 'shadow-sm', 'text-gray-800');
+                expenseTab.classList.remove('text-gray-500');
+                incomeTab.classList.remove('bg-white', 'shadow-sm', 'text-gray-800');
+                incomeTab.classList.add('text-gray-500');
+            } else {
+                incomeTab.classList.add('bg-white', 'shadow-sm', 'text-gray-800');
+                incomeTab.classList.remove('text-gray-500');
+                expenseTab.classList.remove('bg-white', 'shadow-sm', 'text-gray-800');
+                expenseTab.classList.add('text-gray-500');
+            }
+            
+            updateCategoryGrid();
+        }
+
+        // 更新分类网格
+        function updateCategoryGrid() {
+            const categoryGrid = document.getElementById('categoryGrid');
+            
+            if (currentTransactionType === 'expense') {
+                categoryGrid.innerHTML = `
+                    <button class="flex flex-col items-center p-3 rounded-xl bg-orange-50 border-2 border-transparent hover:border-orange-200 transition-all category-btn" data-category="餐饮">
+                        <i class="fas fa-utensils text-orange-500 text-xl mb-1"></i>
+                        <span class="text-xs text-orange-700">餐饮</span>
+                    </button>
+                    <button class="flex flex-col items-center p-3 rounded-xl bg-blue-50 border-2 border-transparent hover:border-blue-200 transition-all category-btn" data-category="交通">
+                        <i class="fas fa-car text-blue-500 text-xl mb-1"></i>
+                        <span class="text-xs text-blue-700">交通</span>
+                    </button>
+                    <button class="flex flex-col items-center p-3 rounded-xl bg-purple-50 border-2 border-transparent hover:border-purple-200 transition-all category-btn" data-category="购物">
+                        <i class="fas fa-shopping-bag text-purple-500 text-xl mb-1"></i>
+                        <span class="text-xs text-purple-700">购物</span>
+                    </button>
+                    <button class="flex flex-col items-center p-3 rounded-xl bg-green-50 border-2 border-transparent hover:border-green-200 transition-all category-btn" data-category="娱乐">
+                        <i class="fas fa-gamepad text-green-500 text-xl mb-1"></i>
+                        <span class="text-xs text-green-700">娱乐</span>
+                    </button>
+                `;
+            } else {
+                categoryGrid.innerHTML = `
+                    <button class="flex flex-col items-center p-3 rounded-xl bg-green-50 border-2 border-transparent hover:border-green-200 transition-all category-btn" data-category="工资">
+                        <i class="fas fa-briefcase text-green-500 text-xl mb-1"></i>
+                        <span class="text-xs text-green-700">工资</span>
+                    </button>
+                    <button class="flex flex-col items-center p-3 rounded-xl bg-blue-50 border-2 border-transparent hover:border-blue-200 transition-all category-btn" data-category="投资">
+                        <i class="fas fa-chart-line text-blue-500 text-xl mb-1"></i>
+                        <span class="text-xs text-blue-700">投资</span>
+                    </button>
+                    <button class="flex flex-col items-center p-3 rounded-xl bg-purple-50 border-2 border-transparent hover:border-purple-200 transition-all category-btn" data-category="兼职">
+                        <i class="fas fa-laptop text-purple-500 text-xl mb-1"></i>
+                        <span class="text-xs text-purple-700">兼职</span>
+                    </button>
+                    <button class="flex flex-col items-center p-3 rounded-xl bg-orange-50 border-2 border-transparent hover:border-orange-200 transition-all category-btn" data-category="其他">
+                        <i class="fas fa-gift text-orange-500 text-xl mb-1"></i>
+                        <span class="text-xs text-orange-700">其他</span>
+                    </button>
+                `;
+            }
+            
+            bindCategoryEvents();
+        }
+
+        // 绑定分类选择事件
+        function bindCategoryEvents() {
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.category-btn').forEach(b => {
+                        b.classList.remove('border-primary-500', 'bg-primary-50');
+                    });
+                    btn.classList.add('border-primary-500', 'bg-primary-50');
+                    selectedCategory = btn.dataset.category;
+                });
+            });
+        }
+
+        // 绑定支付方式选择事件
+        function bindPaymentEvents() {
+            document.querySelectorAll('.payment-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.payment-btn').forEach(b => {
+                        b.classList.remove('border-primary-500', 'bg-primary-50');
+                    });
+                    btn.classList.add('border-primary-500', 'bg-primary-50');
+                    selectedPayment = btn.dataset.payment;
+                });
+            });
+        }
+
+        // 保存交易记录
+        function saveTransaction() {
+            const amount = document.getElementById('amountInput').value;
+            const note = document.getElementById('noteInput').value;
+            
+            if (!amount || !selectedCategory || !selectedPayment) {
+                showToast('请填写完整信息', 'error');
+                return;
+            }
+            
+            // 这里可以添加实际的保存逻辑
+            console.log('保存交易:', {
+                type: currentTransactionType,
+                amount: parseFloat(amount),
+                category: selectedCategory,
+                payment: selectedPayment,
+                note: note,
+                date: new Date()
+            });
+            
+            closeAddModal();
+            showToast('记账成功！');
+        }
+
+        // AI智能输入弹窗
+        function openAiModal() {
+            const modal = document.getElementById('aiInputModal');
+            const modalContent = document.getElementById('aiModalContent');
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modalContent.classList.remove('scale-95');
+                modalContent.classList.add('scale-100');
+            }, 10);
+        }
+
+        function closeAiModal() {
+            const modal = document.getElementById('aiInputModal');
+            const modalContent = document.getElementById('aiModalContent');
+            
+            modalContent.classList.remove('scale-100');
+            modalContent.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                resetAiForm();
+            }, 300);
+        }
+
+        function resetAiForm() {
+            document.getElementById('aiTextInput').value = '';
+            document.getElementById('aiResult').classList.add('hidden');
+            document.getElementById('parseBtn').textContent = '解析';
+            document.getElementById('parseBtn').onclick = parseAiInput;
+        }
+
+        // 语音输入
+        function toggleVoiceInput() {
+            const voiceBtn = document.getElementById('voiceBtn');
+            const voiceStatus = document.getElementById('voiceStatus');
+            
+            if (!isRecording) {
+                isRecording = true;
+                voiceStatus.classList.remove('hidden');
+                voiceBtn.innerHTML = '<i class="fas fa-stop text-white text-2xl"></i>';
+                
+                // 模拟录音3秒后自动停止
+                setTimeout(() => {
+                    isRecording = false;
+                    voiceStatus.classList.add('hidden');
+                    voiceBtn.innerHTML = '<i class="fas fa-microphone text-white text-2xl"></i>';
+                    
+                    // 模拟AI解析结果
+                    document.getElementById('aiTextInput').value = '支付宝买咖啡35元';
+                    showAiResult({
+                        type: '支出',
+                        amount: '¥35.00',
+                        category: '餐饮',
+                        payment: '支付宝'
+                    });
+                }, 3000);
+            } else {
+                isRecording = false;
+                voiceStatus.classList.add('hidden');
+                voiceBtn.innerHTML = '<i class="fas fa-microphone text-white text-2xl"></i>';
+            }
+        }
+
+        // AI解析输入
+        function parseAiInput() {
+            const inputText = document.getElementById('aiTextInput').value.trim();
+            
+            if (!inputText) {
+                showToast('请输入要解析的文字', 'error');
+                return;
+            }
+            
+            // 模拟AI解析
+            setTimeout(() => {
+                const result = simulateAiParse(inputText);
+                showAiResult(result);
+            }, 1000);
+        }
+
+        // 模拟AI解析
+        function simulateAiParse(text) {
+            // 简单的规则匹配，实际应用中会调用AI API
+            const result = {
+                type: '支出',
+                amount: '¥0.00',
+                category: '其他',
+                payment: '未知'
+            };
+            
+            // 提取金额
+            const amountMatch = text.match(/(\d+(?:\.\d+)?)[元]/);
+            if (amountMatch) {
+                result.amount = `¥${amountMatch[1]}`;
+            }
+            
+            // 识别支付方式
+            if (text.includes('支付宝')) result.payment = '支付宝';
+            else if (text.includes('微信')) result.payment = '微信';
+            else if (text.includes('银行卡') || text.includes('刷卡')) result.payment = '银行卡';
+            
+            // 识别分类
+            if (text.includes('咖啡') || text.includes('餐') || text.includes('吃')) result.category = '餐饮';
+            else if (text.includes('地铁') || text.includes('公交') || text.includes('打车')) result.category = '交通';
+            else if (text.includes('购物') || text.includes('买')) result.category = '购物';
+            else if (text.includes('电影') || text.includes('游戏')) result.category = '娱乐';
+            
+            // 识别收入/支出
+            if (text.includes('收入') || text.includes('工资') || text.includes('奖金')) {
+                result.type = '收入';
+            }
+            
+            return result;
+        }
+
+        // 显示AI解析结果
+        function showAiResult(result) {
+            const aiResult = document.getElementById('aiResult');
+            const resultContent = document.getElementById('aiResultContent');
+            
+            resultContent.innerHTML = `
+                <div class="flex justify-between">
+                    <span class="text-gray-600">类型：</span>
+                    <span class="font-medium">${result.type}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">金额：</span>
+                    <span class="font-medium">${result.amount}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">分类：</span>
+                    <span class="font-medium">${result.category}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">支付方式：</span>
+                    <span class="font-medium">${result.payment}</span>
+                </div>
+            `;
+            
+            aiResult.classList.remove('hidden');
+            
+            const parseBtn = document.getElementById('parseBtn');
+            parseBtn.textContent = '确认并添加';
+            parseBtn.onclick = () => {
+                closeAiModal();
+                showToast('AI记账成功！');
+            };
+        }
+
+        // 显示交易详情
+        function showTransactionDetail(id) {
+            const modal = document.getElementById('transactionDetailModal');
+            const modalContent = document.getElementById('detailModalContent');
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modalContent.classList.remove('scale-95');
+                modalContent.classList.add('scale-100');
+            }, 10);
+        }
+
+        function closeTransactionDetail() {
+            const modal = document.getElementById('transactionDetailModal');
+            const modalContent = document.getElementById('detailModalContent');
+            
+            modalContent.classList.remove('scale-100');
+            modalContent.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        // 显示提示消息
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('successToast');
+            const toastMessage = document.getElementById('toastMessage');
+            
+            toastMessage.textContent = message;
+            
+            if (type === 'error') {
+                toast.className = toast.className.replace('bg-green-500', 'bg-red-500');
+            } else {
+                toast.className = toast.className.replace('bg-red-500', 'bg-green-500');
+            }
+            
+            toast.classList.remove('hidden');
+            
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+
+        // 筛选功能
+        function setupFilters() {
+            document.querySelectorAll('.filter-tag').forEach(tag => {
+                tag.addEventListener('click', () => {
+                    document.querySelectorAll('.filter-tag').forEach(t => t.classList.remove('active'));
+                    tag.classList.add('active');
+                    
+                    const filter = tag.dataset.filter;
+                    // 这里可以添加实际的筛选逻辑
+                    console.log('筛选:', filter);
+                });
+            });
+            
+            document.querySelectorAll('.time-filter').forEach(filter => {
+                filter.addEventListener('click', () => {
+                    document.querySelectorAll('.time-filter').forEach(f => f.classList.remove('active'));
+                    filter.classList.add('active');
+                    
+                    const period = filter.dataset.period;
+                    // 这里可以添加时间筛选逻辑
+                    console.log('时间筛选:', period);
+                });
+            });
+        }
+
+        // 事件绑定
+        document.addEventListener('DOMContentLoaded', () => {
+            // 绑定模态框关闭事件
+            document.getElementById('closeModal').addEventListener('click', closeAddModal);
+            document.getElementById('closeAiModal').addEventListener('click', closeAiModal);
+            document.getElementById('closeDetailModal').addEventListener('click', closeTransactionDetail);
+            
+            // 绑定交易类型切换
+            document.getElementById('expenseTab').addEventListener('click', () => {
+                currentTransactionType = 'expense';
+                updateTransactionType();
+            });
+            
+            document.getElementById('incomeTab').addEventListener('click', () => {
+                currentTransactionType = 'income';
+                updateTransactionType();
+            });
+            
+            // 绑定语音按钮
+            document.getElementById('voiceBtn').addEventListener('click', toggleVoiceInput);
+            
+            // 绑定AI解析按钮
+            document.getElementById('parseBtn').addEventListener('click', parseAiInput);
+            
+            // 绑定支付方式选择
+            bindPaymentEvents();
+            
+            // 初始化分类网格
+            updateCategoryGrid();
+            
+            // 设置筛选功能
+            setupFilters();
+            
+            // 点击模态框背景关闭
+            document.getElementById('addTransactionModal').addEventListener('click', (e) => {
+                if (e.target.id === 'addTransactionModal') closeAddModal();
+            });
+            
+            document.getElementById('aiInputModal').addEventListener('click', (e) => {
+                if (e.target.id === 'aiInputModal') closeAiModal();
+            });
+            
+            document.getElementById('transactionDetailModal').addEventListener('click', (e) => {
+                if (e.target.id === 'transactionDetailModal') closeTransactionDetail();
+            });
+        });
+
+        // 初始化图表（如果在统计页面）
+        function initCharts() {
+            if (currentPage === 'statisticsPage') {
+                // 趋势图
+                const trendCtx = document.getElementById('trendChart');
+                if (trendCtx) {
+                    new Chart(trendCtx.getContext('2d'), {
+                        type: 'line',
+                        data: {
+                            labels: ['1日', '5日', '10日', '15日', '20日', '25日', '30日'],
+                            datasets: [{
+                                label: '收入',
+                                data: [0, 1200, 2800, 4200, 5800, 7200, 8500],
+                                borderColor: '#22c55e',
+                                backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                                tension: 0.4,
+                                fill: true
+                            }, {
+                                label: '支出',
+                                data: [0, 800, 1600, 2800, 3900, 4800, 5653],
+                                borderColor: '#ef4444',
+                                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                tension: 0.4,
+                                fill: true
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { display: false } },
+                            scales: { x: { display: false }, y: { display: false } },
+                            elements: { point: { radius: 0 } }
+                        }
+                    });
+                }
+
+                // 支出饼图
+                const expenseCtx = document.getElementById('expenseChart');
+                if (expenseCtx) {
+                    new Chart(expenseCtx.getContext('2d'), {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['餐饮', '交通', '购物', '娱乐', '其他'],
+                            datasets: [{
+                                data: [32, 18, 25, 15, 10],
+                                backgroundColor: ['#f97316', '#3b82f6', '#8b5cf6', '#22c55e', '#6b7280'],
+                                borderWidth: 0
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { display: false } },
+                            cutout: '60%'
+                        }
+                    });
+                }
+            }
+        }
+
+        // 页面切换时初始化图表
+        const originalNavigateTo = navigateTo;
+        navigateTo = function(pageId) {
+            originalNavigateTo(pageId);
+            setTimeout(initCharts, 400);
+        };
+
+        // 占位函数（实际应用中需要实现）
+        function showFilterModal() { showToast('筛选功能开发中...'); }
+        function showAddBudgetModal() { showToast('添加预算功能开发中...'); }
+        function editBudget(category) { showToast(`编辑${category}预算功能开发中...`); }
+        function showAccountSettings() { showToast('账户设置功能开发中...'); }
+        function showDataBackup() { showToast('数据备份功能开发中...'); }
+        function showExportData() { showToast('数据导出功能开发中...'); }
+        function showPrivacySettings() { showToast('隐私设置功能开发中...'); }
+        function showAbout() { showToast('关于应用功能开发中...'); }
+    </script>
+</body>
+</html>
