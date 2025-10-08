@@ -1,0 +1,22 @@
+{
+  "name": "@codex-account-record/server",
+  "version": "0.1.0",
+  "private": true,
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node --loader ts-node/esm src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "lint": "eslint --ext .ts src",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "echo \"Server 测试用例尚未实现\""
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "ts-node": "^10.9.2"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
