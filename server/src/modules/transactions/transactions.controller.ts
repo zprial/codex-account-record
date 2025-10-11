@@ -1,57 +1,44 @@
-import { Request, Response } from "express";
+import { Request, Response } from 'express';
 
-const sampleTransaction = {
-  id: "tx_stub_1",
-  amount: 128.5,
-  type: "expense",
-  accountId: "account_stub_1",
-  categoryId: "category_stub_food",
-  occurredAt: new Date().toISOString(),
-  description: "样例交易数据，待接入真实后端",
-  tags: ["stub"],
-  attachments: [],
-  aiJobId: null
-};
+import {
+  createTransaction as createTransactionService,
+  deleteTransaction as deleteTransactionService,
+  getTransactionDetail,
+  listTransactions as listTransactionsService,
+  updateTransaction as updateTransactionService
+} from './transactions.service';
+import type {
+  CreateTransactionInput,
+  ListTransactionsQuery,
+  UpdateTransactionInput
+} from './transactions.schema';
 
-export async function listTransactions(_req: Request, res: Response) {
-  res.json({
-    items: [sampleTransaction],
-    pagination: {
-      page: 1,
-      pageSize: 20,
-      totalItems: 1,
-      totalPages: 1
-    }
-  });
+export function listTransactions(req: Request, res: Response) {
+  const user = req.user!;
+  const result = listTransactionsService(user.id, req.query as unknown as ListTransactionsQuery);
+  res.json(result);
 }
 
-export async function getTransaction(_req: Request, res: Response) {
-  res.json(sampleTransaction);
+export function getTransaction(req: Request, res: Response) {
+  const user = req.user!;
+  const item = getTransactionDetail(user.id, req.params.id);
+  res.json(item);
 }
 
-export async function createTransaction(req: Request, res: Response) {
-  const payload = req.body;
-
-  res.status(201).json({
-    ...sampleTransaction,
-    ...payload,
-    id: "tx_stub_created",
-    occurredAt: new Date(payload.occurredAt).toISOString()
-  });
+export function createTransaction(req: Request, res: Response) {
+  const user = req.user!;
+  const item = createTransactionService(user.id, req.body as CreateTransactionInput);
+  res.status(201).json(item);
 }
 
-export async function updateTransaction(req: Request, res: Response) {
-  const payload = req.body;
-  res.json({
-    ...sampleTransaction,
-    ...payload,
-    id: req.params.id,
-    occurredAt: payload.occurredAt
-      ? new Date(payload.occurredAt).toISOString()
-      : sampleTransaction.occurredAt
-  });
+export function updateTransaction(req: Request, res: Response) {
+  const user = req.user!;
+  const item = updateTransactionService(user.id, req.params.id, req.body as UpdateTransactionInput);
+  res.json(item);
 }
 
-export async function deleteTransaction(req: Request, res: Response) {
+export function deleteTransaction(req: Request, res: Response) {
+  const user = req.user!;
+  deleteTransactionService(user.id, req.params.id);
   res.status(204).send();
 }

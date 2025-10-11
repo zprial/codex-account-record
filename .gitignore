@@ -11,6 +11,10 @@ build/
 coverage/
 .expo/
 .expo-shared/
+server/data/*.db
+server/data/*.db-journal
+server/data/*.db-shm
+server/data/*.db-wal
 
 # Environment files
 .env

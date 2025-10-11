@@ -1,13 +1,15 @@
-import { Router } from "express";
+import { Router } from 'express';
 
-import { authRouter } from "./auth/auth.router";
-import { transactionsRouter } from "./transactions/transactions.router";
+import { authRouter } from './auth/auth.router';
+import { accountsRouter } from './accounts/accounts.router';
+import { transactionsRouter } from './transactions/transactions.router';
 
 export function registerModuleRoutes() {
   const router = Router();
 
-  router.use("/auth", authRouter);
-  router.use("/transactions", transactionsRouter);
+  router.use('/auth', authRouter);
+  router.use('/accounts', accountsRouter);
+  router.use('/transactions', transactionsRouter);
 
   return router;
 }

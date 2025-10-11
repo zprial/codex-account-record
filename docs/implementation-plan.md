@@ -2,6 +2,13 @@
 
 本文档将以中文梳理项目目录结构、开发阶段、核心功能清单以及待确认事项，帮助后续的前端（Web 应用）与后端（Node.js 服务）开发工作顺利推进。
 
+## 近期进度更新（2025-10-11）
+
+- ✅ 完成后端认证模块：支持注册、登录、刷新与注销，基于自建 SQLite 持久层和刷新令牌黑名单。
+- ✅ 实现账户模块：账户创建/更新/归档、初始余额写入及余额实时同步。
+- ✅ 实现交易模块：收入、支出、转账 CRUD，含分页筛选、标签、描述与余额联动校验。
+- ⏳ 预算提醒、统计分析、AI 接口、导入导出等功能待开发，将在下一阶段继续推进。
+
 ## 一、代码仓库目录规划
 
 ```
@@ -171,16 +178,16 @@
 
 ### 2. 前端页面与组件拆解
 
-| 原型区域 | Web 页面/组件 | 关键状态/接口 |
-| --- | --- | --- |
-| 首页仪表盘（头部概览、快速操作、AI 入口、最近交易） | `DashboardPage` + `QuickActionsPanel`, `MonthlySummaryCard`, `RecentTransactionsTable` | `GET /analytics/monthly-summary`, `GET /transactions?limit=3`；结合全局状态触发新增记账与 AI 入口 |
-| 交易明细页（筛选标签、按日/类型分组列表） | `TransactionsPage` + `TransactionFilters`, `TransactionsVirtualList` | `GET /transactions`（分页、筛选）；`useInfiniteQuery` 维护虚拟滚动与懒加载 |
-| 统计分析页（时间选择、卡片指标、趋势图、支出分析） | `AnalyticsPage` + `TimeRangeSelector`, `BalanceOverviewCard`, `TrendChart`, `CategoryBreakdown` | `GET /analytics/overview`, `GET /analytics/trend`, `GET /analytics/category`；使用 Recharts/Nivo 绘制图表 |
-| 预算管理页（总览、预算卡片、进度条） | `BudgetsPage` + `BudgetSummaryCard`, `BudgetItemCard` | `GET /budgets`, `PATCH /budgets/:id`（启停、额度调整） |
-| 个人中心页（用户信息、快捷功能菜单） | `ProfilePage` + `UserInfoHeader`, `SettingsList` | `GET /user/profile`, `GET /user/settings`；进入数据导入导出、通知设置等二级页面 |
-| 添加记账弹窗 | `RecordDialog` | 本地表单状态；提交调用 `POST /transactions`，成功后触发乐观更新与全局通知 |
-| AI 智能输入抽屉（语音、文本、解析结果预填） | `AiCaptureDrawer` | 上传音频/图片到 `POST /ai/jobs`，并通过 WebSocket/SSE 订阅解析结果；允许用户确认后回填 `RecordDialog` 表单 |
-| 交易详情抽屉 | `TransactionDetailDrawer` | `GET /transactions/:id`，展示附件、AI 解析详情及快捷操作 |
+| 原型区域                                            | Web 页面/组件                                                                                   | 关键状态/接口                                                                                              |
+| --------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| 首页仪表盘（头部概览、快速操作、AI 入口、最近交易） | `DashboardPage` + `QuickActionsPanel`, `MonthlySummaryCard`, `RecentTransactionsTable`          | `GET /analytics/monthly-summary`, `GET /transactions?limit=3`；结合全局状态触发新增记账与 AI 入口          |
+| 交易明细页（筛选标签、按日/类型分组列表）           | `TransactionsPage` + `TransactionFilters`, `TransactionsVirtualList`                            | `GET /transactions`（分页、筛选）；`useInfiniteQuery` 维护虚拟滚动与懒加载                                 |
+| 统计分析页（时间选择、卡片指标、趋势图、支出分析）  | `AnalyticsPage` + `TimeRangeSelector`, `BalanceOverviewCard`, `TrendChart`, `CategoryBreakdown` | `GET /analytics/overview`, `GET /analytics/trend`, `GET /analytics/category`；使用 Recharts/Nivo 绘制图表  |
+| 预算管理页（总览、预算卡片、进度条）                | `BudgetsPage` + `BudgetSummaryCard`, `BudgetItemCard`                                           | `GET /budgets`, `PATCH /budgets/:id`（启停、额度调整）                                                     |
+| 个人中心页（用户信息、快捷功能菜单）                | `ProfilePage` + `UserInfoHeader`, `SettingsList`                                                | `GET /user/profile`, `GET /user/settings`；进入数据导入导出、通知设置等二级页面                            |
+| 添加记账弹窗                                        | `RecordDialog`                                                                                  | 本地表单状态；提交调用 `POST /transactions`，成功后触发乐观更新与全局通知                                  |
+| AI 智能输入抽屉（语音、文本、解析结果预填）         | `AiCaptureDrawer`                                                                               | 上传音频/图片到 `POST /ai/jobs`，并通过 WebSocket/SSE 订阅解析结果；允许用户确认后回填 `RecordDialog` 表单 |
+| 交易详情抽屉                                        | `TransactionDetailDrawer`                                                                       | `GET /transactions/:id`，展示附件、AI 解析详情及快捷操作                                                   |
 
 以上组件需抽象常用 UI（按钮、卡片、标签、进度条、图表包装器）进入 `web/src/components/ui/`，保持视觉一致性并降低维护成本。
 

@@ -15,7 +15,8 @@
 └── .husky/     # Git 钩子（执行 npm install 后生成）
 ```
 
-- `app/` 与 `server/` 将在后续迭代中逐步补充实际业务代码。
+- `server/` 已包含基于 Express + SQLite 的后端服务，支持账户与交易管理。
+- `app/` 将在后续迭代中逐步补充实际业务代码。
 - `shared/` 用于存放 DTO、常量、工具函数等可复用模块。
 
 ## 快速开始
@@ -36,20 +37,29 @@
 
    完成后会生成 `.husky/` 目录，并自动启用 `pre-commit` 钩子。
 
-3. **代码质量工具**
-
-   - `npm run lint`：逐个 workspace 执行 ESLint。
-   - `npm run test`：当前阶段各子项目暂未实现测试，命令会输出占位信息。
+3. **常用脚本**
+   - `npm run lint --workspace server`：对后端服务运行 ESLint。
+   - `npm run typecheck --workspace server`：执行 TypeScript 全量类型检查。
+   - `npm run test --workspace server`：使用 Vitest + Supertest 运行后端集成测试。
    - `npm run format`：使用 Prettier 统一格式化所有文件。
+
+4. **启动后端开发服务器**
+
+   ```bash
+   npm run dev --workspace server
+   ```
+
+   默认使用本地 SQLite 数据库（`server/data/dev.db`），首次启动会自动初始化表结构。
 
 ## 环境变量
 
-参考 `.env.example` 文件，复制后命名为 `.env` 并填入实际的密钥或连接信息。后端服务将依赖这些配置连接数据库、缓存、AI 服务与对象存储。
+参考 `.env.example` 文件，复制后命名为 `.env` 并填入实际的密钥或连接信息。后端服务默认使用 SQLite 数据库，可通过 `DATABASE_URL`
+指定数据库文件路径，或在生产环境切换到其他托管方案。
 
 ## 下一步计划
 
-- 搭建后端 Express 应用骨架、数据库 schema 与 Prisma 配置。
-- 初始化 Expo 应用入口、路由与全局状态管理框架。
-- 在 `shared/` 中沉淀通用类型定义与校验 Schema。
+- 完成预算、统计分析、AI 解析等后端模块，补齐导入导出能力。
+- 初始化 Web / App 前端界面，并对接已实现的 API。
+- 在 `shared/` 中沉淀通用类型定义与校验 Schema，服务多端协同开发。
 
 如需了解更详细的实施阶段，请查阅 `docs/implementation-plan.md`。
