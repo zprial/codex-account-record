@@ -1,22 +1,25 @@
 # 个人记账应用实施计划
 
-本文档将以中文梳理项目目录结构、开发阶段、核心功能清单以及待确认事项，帮助后续的前端（React Native App）与后端（Node.js 服务）开发工作顺利推进。
+本文档将以中文梳理项目目录结构、开发阶段、核心功能清单以及待确认事项，帮助后续的前端（Web 应用）与后端（Node.js 服务）开发工作顺利推进。
 
 ## 一、代码仓库目录规划
 
 ```
 /（仓库根目录）
-├── app/                 # 移动端项目：React Native + Expo + TypeScript
-│   ├── app.json
+├── web/                 # Web 应用：Next.js + React + TypeScript
 │   ├── package.json
+│   ├── next.config.js
 │   ├── src/
-│   │   ├── components/  # 可复用基础组件、表单控件等
-│   │   ├── screens/     # 各个业务页面（首页、记账、统计、预算等）
-│   │   ├── navigation/  # React Navigation/Expo Router 配置
-│   │   ├── store/       # Redux Toolkit / Zustand 等状态管理
+│   │   ├── app/         # 页面路由（Next.js App Router）
+│   │   ├── components/  # 复用组件、UI 资产
+│   │   ├── features/    # 业务模块（记账、统计、预算等）
+│   │   ├── hooks/       # 自定义 Hooks
 │   │   ├── services/    # 与后端交互、AI 接口封装
 │   │   └── utils/       # 工具方法、格式化函数
-│   └── tests/           # 移动端单元测试 / 组件测试
+│   └── tests/           # Web 端单元测试 / 组件测试
+├── app/                 # React Native 客户端骨架（暂缓开发）
+│   ├── package.json
+│   └── src/             # 保留原结构，待后续重启移动端时恢复
 ├── server/              # 后端服务：Node.js + Express + TypeScript
 │   ├── package.json
 │   ├── src/
@@ -54,7 +57,7 @@
 
 ### 阶段 0：基础设施搭建
 
-1. 初始化 monorepo，创建 `app/`、`server/`、`shared/` 三个子包。
+1. 初始化 monorepo，创建 `web/`、`server/`、`shared/` 三个子包（保留 `app/` 目录作为后续恢复移动端时的占位）。
 2. 配置 TypeScript、ESLint、Prettier、EditorConfig 等统一代码风格工具。
 3. 使用 Husky + lint-staged 配置 Git Hooks，确保提交前自动执行格式化与 lint。
 4. 规划环境变量方案（`.env`, `.env.example`），区分开发、测试、生产环境。
@@ -86,43 +89,46 @@
    - 数据导出：CSV、Excel、PDF；支持自定义时间区间和字段选择。
    - 数据备份与恢复接口；多设备同步策略（如基于时间戳的增量同步）。
 
-### 阶段 2：移动端应用（React Native）
+### 阶段 2：Web 应用（Next.js + React）
 
-1. **项目初始化**：采用 Expo（Managed Workflow），配置 TypeScript、Redux Toolkit、React Query 或 RTK Query，根据需求选择 UI 库（React Native Paper / Ant Design Mobile RN / React Native Elements）。
+1. **项目初始化**：使用 Next.js App Router + TypeScript，启用 ESLint/Prettier，配置 Tailwind CSS（或 Ant Design/Chakra UI）并接入绝对路径别名；确定 API 客户端（RTK Query/React Query）与全局状态管理（Redux Toolkit）。
 
-2. **认证流程**：欢迎页、登录、注册、忘记密码；使用安全存储保存 Token（Expo Secure Store）；处理 Token 续期和自动登录。
+2. **认证与访问控制**：实现登录、注册、忘记密码页；使用 NextAuth.js 或自定义凭证流，结合 HttpOnly Cookie 保存访问令牌并处理刷新逻辑；配置受保护路由和客户端鉴权守卫。
 
-3. **首页概览**：展示账户总览、预算执行、提醒信息；提供快捷入口（快速记账、扫码/拍照、语音输入等）。
+3. **应用框架与导航**：构建响应式布局（侧边栏 + 顶部栏），兼容桌面与移动浏览器；实现 Breadcrumb、全局通知、加载骨架、主题切换。
 
-4. **记账模块**：
-   - 交易列表：分页加载、日期/金额/支付方式/类别筛选；支持多条件组合筛选和排序。
-   - 交易详情：查看图片凭证、AI 解析详情；允许编辑或复制。
-   - 新增/编辑表单：金额输入校验、分类选择、支付方式选择、标签；支持 AI 自动填充后人工修正；支持常用模板与定期交易。
+4. **PWA 能力**：配置 Web App Manifest、Service Worker 与 Workbox 缓存策略，实现基本离线可用、图标安装提示、版本更新提示；预留推送通知/后台同步的扩展点。
 
-5. **账户模块**：账户列表、余额详情、账户间转账流程、余额调整记录。
+5. **首页概览仪表盘**：展示账户总览、预算执行、提醒消息及快捷入口（快速记账、AI 输入）；整合统计 API，使用 Recharts/ECharts/Nivo 绘制指标卡与图表。
 
-6. **统计模块**：使用 Victory Native / Recharts 等图表组件，展示趋势图、饼图、柱状图；支持时间范围切换与筛选。
+6. **记账模块**：
+   - 列表页：使用虚拟滚动（React Virtuoso/React Window），提供筛选、排序、区间查询与导出。
+   - 详情抽屉：展示附件预览、AI 解析记录、复制与编辑操作。
+   - 新增/编辑表单：金额、分类、账户、标签、多币种校验；支持 AI 解析后预填及草稿保存。
 
-7. **预算模块**：设置预算、显示使用率进度条、预警提醒，查看历史预算执行报告。
+7. **账户与预算模块**：账户列表、余额调整、账户间转账流程；预算配置界面（进度条、阈值提示），联动统计模块展示预算执行情况。
 
-8. **AI 功能入口**：
-   - 图片记账：调用摄像头或相册上传 -> 后端 OCR -> 返回解析结果供用户确认。
-   - 语音记账：录音 -> 上传后端语音识别 -> 文本解析 -> 表单预填。
-   - 自然语言文本解析：输入文本后调用后端 NLP，展示解析结果并允许修改。
+8. **统计分析模块**：提供趋势、类别分布、收支对比、现金流预测等视图；支持时间范围和维度切换，并允许导出图表截图或原始数据。
 
-9. **设置与数据管理**：支付方式自定义、数据导入导出入口、数据备份与同步控制、通知设置、隐私与安全选项。
+9. **AI 能力入口**：
+   - 上传票据/截图：调用后端 OCR 任务并实时显示解析进度。
+   - 自然语言/语音输入：支持文本解析、语音转写后预填表单。
+   - AI 助手侧边栏：允许用户查询历史交易、预算建议（后续扩展）。
+
+10. **设置与数据管理**：用户偏好、导入导出、通知配置、多语言/主题切换、团队协作扩展接口等。
 
 ### 阶段 3：共享模块与测试体系
 
 1. 将常用 DTO、校验 Schema、常量放入 `shared/`，通过 TypeScript 类型共享减少前后端对接成本。
-2. 后端使用 Jest + Supertest 编写单元与集成测试；移动端使用 Jest + React Native Testing Library；必要时引入 Detox/Appium 做关键流程 E2E。
+2. 后端使用 Jest + Supertest 编写单元与集成测试；Web 端使用 Vitest/Jest + React Testing Library；关键流程可引入 Playwright 做端到端测试。
 3. 构建 Mock Server 或使用 MSW（Mock Service Worker）模拟后端接口，方便前端并行开发。
+4. 接入 Lighthouse/PWABuilder 等自动化审查，确保核心页面通过 PWA、性能与可访问性指标。
 
 ### 阶段 4：部署与运维
 
 1. 编写 Dockerfile 和 docker-compose，支持本地一键启动数据库、缓存、后端服务。
 2. 规划 CI/CD：GitHub Actions（或其他平台）执行 lint、测试、构建、发布。
-3. 移动端使用 Expo EAS 构建 iOS/Android 包；后端部署可选择 Fly.io / Render / AWS / 阿里云等。
+3. Web 前端可部署至 Vercel/Netlify/Cloudflare Pages；部署时启用 HTTPS、PWA Manifest 版本管理与 Service Worker 缓存预热；后端部署可选择 Fly.io / Render / AWS / 阿里云等，并配置环境变量与 CDN。
 4. 整合日志与监控（Sentry、Logtail、Prometheus 等），并规划告警机制。
 
 ## 三、交付物与优先级建议
@@ -131,6 +137,7 @@
    - 用户认证、账户管理、基本记账（收入/支出）、列表查看与筛选。
    - 月度统计概览、预算设置与提醒。
    - 自然语言文本解析（优先实现文本 -> 结构化数据），图片/语音可在后续迭代。
+   - 基础 PWA 能力（安装提示、离线首页、版本更新提示）。
 
 2. **增强功能**：
    - 图片识别记账、语音输入、定期交易自动记账。
@@ -153,29 +160,29 @@
 
 ## 五、基于原型图的技术架构与实现计划
 
-结合 `complete-app.html` 所呈现的移动端原型，以下内容聚焦于如何在现有 monorepo 策略下实现同款功能体验，并明确前后端职责、数据模型与迭代节奏。
+结合 `complete-app.html` 所呈现的原型界面，我们将其适配为响应式 Web 应用，并在现有 monorepo 策略下明确前后端职责、数据模型与迭代节奏。
 
 ### 1. 整体架构
 
-- **客户端**：React Native（Expo Managed Workflow）+ TypeScript，配合 Tailwind RN（或 NativeWind）完成与原型一致的样式表现；状态管理采用 Redux Toolkit + RTK Query，统一管理账户数据、预算、交易列表与 AI 解析结果。
+- **客户端**：Next.js + React + TypeScript，配合 Tailwind CSS（或 Chakra/Ant Design）完成响应式界面；启用 PWA（Web App Manifest、Service Worker、离线缓存与通知能力）；状态管理采用 Redux Toolkit + RTK Query（或 React Query），统一管理账户数据、预算、交易列表与 AI 解析结果。
 - **后端**：Node.js + NestJS/Express + TypeScript，结合 Prisma 访问 PostgreSQL；通过 RESTful API 对接客户端，辅以 WebSocket（或 SSE）推送长耗时 AI 任务的解析结果。
 - **AI 网关**：封装文本解析、语音转写、图像 OCR 的统一接口层，内部支持多厂商切换；异步任务交给 BullMQ + Redis 处理，确保上传票据或语音时的实时反馈与排队处理。
 - **共享模块**：沿用 `shared/` 包提供 DTO、Zod 校验 Schema、业务常量（账户类型、分类枚举、预算周期等），并在客户端与后端复用。
 
 ### 2. 前端页面与组件拆解
 
-| 原型区域 | React Native Screen/Component | 关键状态/接口 |
+| 原型区域 | Web 页面/组件 | 关键状态/接口 |
 | --- | --- | --- |
-| 首页（头部概览、快速操作、AI 入口、最近交易） | `HomeScreen` + `QuickActions`, `MonthlySummaryCard`, `RecentTransactionsList` | `GET /analytics/monthly-summary`, `GET /transactions?limit=3`；触发新增记账和 AI 弹窗的本地状态 |
-| 交易明细页（筛选标签、按日分组列表） | `TransactionsScreen` + `TransactionFilterBar`, `GroupedTransactionList` | `GET /transactions`（分页、筛选）；`useInfiniteQuery` 维护滚动加载 |
-| 统计分析页（时间选择、卡片指标、趋势图、支出分析） | `AnalyticsScreen` + `TimeRangeSelector`, `BalanceOverviewCard`, `TrendChart`, `CategoryBreakdown` | `GET /analytics/overview`, `GET /analytics/trend`, `GET /analytics/category`；使用 Victory Native 绘制折线/饼图 |
-| 预算管理页（总览、预算卡片、进度条） | `BudgetsScreen` + `BudgetSummaryCard`, `BudgetItemCard` | `GET /budgets`, `PATCH /budgets/:id`（启停、额度调整） |
-| 个人中心页（用户信息、快捷功能菜单） | `ProfileScreen` + `UserInfoHeader`, `SettingsList` | `GET /user/profile`, `GET /user/settings`；跳转到数据导入导出、通知设置等二级页面 |
-| 添加记账弹窗 | `RecordModal` | 本地表单状态；提交调用 `POST /transactions`，成功后触发乐观更新与 Toast |
-| AI 智能输入弹窗（语音、文本、解析结果预填） | `AiCaptureSheet` | 上传音频/图片到 `POST /ai/jobs`，并通过 WebSocket 订阅解析结果；允许用户确认后回填 `RecordModal` 表单 |
-| 交易详情弹窗 | `TransactionDetailSheet` | `GET /transactions/:id`，展示附件、AI 解析详情及快捷操作 |
+| 首页仪表盘（头部概览、快速操作、AI 入口、最近交易） | `DashboardPage` + `QuickActionsPanel`, `MonthlySummaryCard`, `RecentTransactionsTable` | `GET /analytics/monthly-summary`, `GET /transactions?limit=3`；结合全局状态触发新增记账与 AI 入口 |
+| 交易明细页（筛选标签、按日/类型分组列表） | `TransactionsPage` + `TransactionFilters`, `TransactionsVirtualList` | `GET /transactions`（分页、筛选）；`useInfiniteQuery` 维护虚拟滚动与懒加载 |
+| 统计分析页（时间选择、卡片指标、趋势图、支出分析） | `AnalyticsPage` + `TimeRangeSelector`, `BalanceOverviewCard`, `TrendChart`, `CategoryBreakdown` | `GET /analytics/overview`, `GET /analytics/trend`, `GET /analytics/category`；使用 Recharts/Nivo 绘制图表 |
+| 预算管理页（总览、预算卡片、进度条） | `BudgetsPage` + `BudgetSummaryCard`, `BudgetItemCard` | `GET /budgets`, `PATCH /budgets/:id`（启停、额度调整） |
+| 个人中心页（用户信息、快捷功能菜单） | `ProfilePage` + `UserInfoHeader`, `SettingsList` | `GET /user/profile`, `GET /user/settings`；进入数据导入导出、通知设置等二级页面 |
+| 添加记账弹窗 | `RecordDialog` | 本地表单状态；提交调用 `POST /transactions`，成功后触发乐观更新与全局通知 |
+| AI 智能输入抽屉（语音、文本、解析结果预填） | `AiCaptureDrawer` | 上传音频/图片到 `POST /ai/jobs`，并通过 WebSocket/SSE 订阅解析结果；允许用户确认后回填 `RecordDialog` 表单 |
+| 交易详情抽屉 | `TransactionDetailDrawer` | `GET /transactions/:id`，展示附件、AI 解析详情及快捷操作 |
 
-以上组件需抽象常用 UI（按钮、卡片、标签、进度条、图表包装器）进入 `app/src/components/ui/`，便于风格一致性与可维护性。
+以上组件需抽象常用 UI（按钮、卡片、标签、进度条、图表包装器）进入 `web/src/components/ui/`，保持视觉一致性并降低维护成本。
 
 ### 3. 后端模块落地
 
@@ -199,17 +206,17 @@
 
 ### 5. 实现节奏（结合原型优先级）
 
-1. **迭代 1 - 基础记账闭环**：完成鉴权、账户/分类基础数据、交易新增与列表、首页概览卡片。客户端先落地 `HomeScreen`、`TransactionsScreen` 和 `RecordModal`，后端完成对应 CRUD API。
-2. **迭代 2 - 统计与预算**：扩展统计 API 与预算模块，前端实现 `AnalyticsScreen`、`BudgetsScreen`，图表组件初版上线。
-3. **迭代 3 - AI 能力**：搭建 AI 网关、异步任务、WebSocket，前端补齐 `AiCaptureSheet`、交易详情 AI 区块，并实现语音/图片上传流程。
-4. **迭代 4 - 增强体验**：实现数据导入导出、通知设置、个人中心功能菜单；打磨动画、骨架屏、离线缓存等体验。
+1. **迭代 1 - 基础记账闭环**：完成鉴权、账户/分类基础数据、交易新增与列表、首页概览卡片。前端优先实现 `DashboardPage`、`TransactionsPage` 与 `RecordDialog`，后端提供对应 CRUD API。
+2. **迭代 2 - 统计与预算**：扩展统计 API 与预算模块，前端交付 `AnalyticsPage`、`BudgetsPage`，完成图表组件初版。
+3. **迭代 3 - AI 能力**：搭建 AI 网关、异步任务、WebSocket/SSE，前端补齐 `AiCaptureDrawer`、交易详情 AI 区块，并完成语音/图片上传流程。
+4. **迭代 4 - 增强体验**：实现数据导入导出、通知设置、`ProfilePage` 等功能菜单；打磨动画、骨架屏、离线缓存等体验。
 5. **迭代 5 - 质量与交付**：覆盖单元/集成测试、E2E 场景；完善监控报警、容灾策略，准备发布。
 
 ### 6. 风险与应对
 
 - **AI 成本与性能**：为不同 AI 任务设置速率限制与额度统计，必要时引入本地轻量模型或批量处理。
-- **移动端性能**：交易列表采用虚拟化列表（FlashList），图表按需加载；大图/音频上传前先压缩。
+- **Web 性能**：交易列表采用虚拟列表技术（React Window/Virtuoso），图表按需加载并懒加载依赖；上传文件前进行压缩与格式校验，开启代码拆分和缓存策略。
 - **数据一致性**：交易与账户余额通过数据库事务保障；异步 AI 结果写回时使用乐观锁防止重复覆盖用户手动修改。
-- **多终端同步**：后端提供基于 `updated_at` 的增量接口，客户端利用本地 SQLite/AsyncStorage 做缓存，保证弱网体验。
+- **多终端同步**：后端提供基于 `updated_at` 的增量接口，Web 客户端通过 IndexedDB/localForage 做离线缓存，保证弱网体验。
 
 该计划覆盖了原型中出现的主要交互场景，可作为后续需求评审与排期的基础。若原型后续有调整，请同步更新对应屏幕与 API 映射表。
