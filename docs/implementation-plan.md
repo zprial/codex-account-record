@@ -150,3 +150,66 @@
 5. **合规与安全**：除了常规加密与隐私保护，还有没有特定行业合规要求（如等保、金融相关监管）需要提前满足？
 
 如有任何疑问或需要调整的部分，请告知，我会根据反馈继续优化计划并开始具体的代码实现。
+
+## 五、基于原型图的技术架构与实现计划
+
+结合 `complete-app.html` 所呈现的移动端原型，以下内容聚焦于如何在现有 monorepo 策略下实现同款功能体验，并明确前后端职责、数据模型与迭代节奏。
+
+### 1. 整体架构
+
+- **客户端**：React Native（Expo Managed Workflow）+ TypeScript，配合 Tailwind RN（或 NativeWind）完成与原型一致的样式表现；状态管理采用 Redux Toolkit + RTK Query，统一管理账户数据、预算、交易列表与 AI 解析结果。
+- **后端**：Node.js + NestJS/Express + TypeScript，结合 Prisma 访问 PostgreSQL；通过 RESTful API 对接客户端，辅以 WebSocket（或 SSE）推送长耗时 AI 任务的解析结果。
+- **AI 网关**：封装文本解析、语音转写、图像 OCR 的统一接口层，内部支持多厂商切换；异步任务交给 BullMQ + Redis 处理，确保上传票据或语音时的实时反馈与排队处理。
+- **共享模块**：沿用 `shared/` 包提供 DTO、Zod 校验 Schema、业务常量（账户类型、分类枚举、预算周期等），并在客户端与后端复用。
+
+### 2. 前端页面与组件拆解
+
+| 原型区域 | React Native Screen/Component | 关键状态/接口 |
+| --- | --- | --- |
+| 首页（头部概览、快速操作、AI 入口、最近交易） | `HomeScreen` + `QuickActions`, `MonthlySummaryCard`, `RecentTransactionsList` | `GET /analytics/monthly-summary`, `GET /transactions?limit=3`；触发新增记账和 AI 弹窗的本地状态 |
+| 交易明细页（筛选标签、按日分组列表） | `TransactionsScreen` + `TransactionFilterBar`, `GroupedTransactionList` | `GET /transactions`（分页、筛选）；`useInfiniteQuery` 维护滚动加载 |
+| 统计分析页（时间选择、卡片指标、趋势图、支出分析） | `AnalyticsScreen` + `TimeRangeSelector`, `BalanceOverviewCard`, `TrendChart`, `CategoryBreakdown` | `GET /analytics/overview`, `GET /analytics/trend`, `GET /analytics/category`；使用 Victory Native 绘制折线/饼图 |
+| 预算管理页（总览、预算卡片、进度条） | `BudgetsScreen` + `BudgetSummaryCard`, `BudgetItemCard` | `GET /budgets`, `PATCH /budgets/:id`（启停、额度调整） |
+| 个人中心页（用户信息、快捷功能菜单） | `ProfileScreen` + `UserInfoHeader`, `SettingsList` | `GET /user/profile`, `GET /user/settings`；跳转到数据导入导出、通知设置等二级页面 |
+| 添加记账弹窗 | `RecordModal` | 本地表单状态；提交调用 `POST /transactions`，成功后触发乐观更新与 Toast |
+| AI 智能输入弹窗（语音、文本、解析结果预填） | `AiCaptureSheet` | 上传音频/图片到 `POST /ai/jobs`，并通过 WebSocket 订阅解析结果；允许用户确认后回填 `RecordModal` 表单 |
+| 交易详情弹窗 | `TransactionDetailSheet` | `GET /transactions/:id`，展示附件、AI 解析详情及快捷操作 |
+
+以上组件需抽象常用 UI（按钮、卡片、标签、进度条、图表包装器）进入 `app/src/components/ui/`，便于风格一致性与可维护性。
+
+### 3. 后端模块落地
+
+1. **鉴权与用户管理**：沿用 JWT + Refresh Token；支持第三方登录扩展（预留苹果/微信登录能力）。
+2. **交易模块**：提供 CRUD、批量导入、附件上传（S3/OSS）；对接 AI 解析结果并维护置信度字段，支持撤销 AI 解析。
+3. **账户模块**：账户余额随交易实时更新，提供余额调整历史；与预算模块联动以校验账户类型。
+4. **预算模块**：支持月/季/年周期、阈值提醒，提供统计 API 配合前端展示百分比进度条。
+5. **统计模块**：按时间区间聚合收入/支出、趋势与分类分析，返回与原型指标对应的字段（结余、收入、支出、Top 分类）。
+6. **AI 模块**：封装 `TextParseService`, `VoiceTranscribeService`, `ImageOcrService`；对外只暴露统一 `POST /ai/jobs`，内部根据 `jobType` 分派任务并写入 `ai_jobs` 表，完成后通过消息队列推送结果。
+7. **通知模块**：预算预警、AI 结果、同步提醒走统一 Notification Service，可后续接入短信/推送。
+
+### 4. 数据模型（关键表）
+
+- `users`：基本信息、偏好设置、AI 使用额度统计。
+- `accounts`：账户类型、余额、是否计入统计。
+- `categories`：收入/支出分类及层级。
+- `transactions`：金额、类型、账户、分类、标签、时间、备注、附件引用。
+- `transaction_ai_results`：原始输入、解析结果 JSON、置信度、状态（pending/success/failed）。
+- `budgets`：分类、周期、目标金额、提醒阈值、当前使用额。
+- `notifications`：用户消息记录。
+
+### 5. 实现节奏（结合原型优先级）
+
+1. **迭代 1 - 基础记账闭环**：完成鉴权、账户/分类基础数据、交易新增与列表、首页概览卡片。客户端先落地 `HomeScreen`、`TransactionsScreen` 和 `RecordModal`，后端完成对应 CRUD API。
+2. **迭代 2 - 统计与预算**：扩展统计 API 与预算模块，前端实现 `AnalyticsScreen`、`BudgetsScreen`，图表组件初版上线。
+3. **迭代 3 - AI 能力**：搭建 AI 网关、异步任务、WebSocket，前端补齐 `AiCaptureSheet`、交易详情 AI 区块，并实现语音/图片上传流程。
+4. **迭代 4 - 增强体验**：实现数据导入导出、通知设置、个人中心功能菜单；打磨动画、骨架屏、离线缓存等体验。
+5. **迭代 5 - 质量与交付**：覆盖单元/集成测试、E2E 场景；完善监控报警、容灾策略，准备发布。
+
+### 6. 风险与应对
+
+- **AI 成本与性能**：为不同 AI 任务设置速率限制与额度统计，必要时引入本地轻量模型或批量处理。
+- **移动端性能**：交易列表采用虚拟化列表（FlashList），图表按需加载；大图/音频上传前先压缩。
+- **数据一致性**：交易与账户余额通过数据库事务保障；异步 AI 结果写回时使用乐观锁防止重复覆盖用户手动修改。
+- **多终端同步**：后端提供基于 `updated_at` 的增量接口，客户端利用本地 SQLite/AsyncStorage 做缓存，保证弱网体验。
+
+该计划覆盖了原型中出现的主要交互场景，可作为后续需求评审与排期的基础。若原型后续有调整，请同步更新对应屏幕与 API 映射表。
