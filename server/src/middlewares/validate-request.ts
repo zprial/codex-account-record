@@ -1,7 +1,5 @@
-import { NextFunction, Request, Response } from "express";
-import { AnyZodObject, ZodEffects } from "zod";
-
-type ZodSchema<T> = AnyZodObject | ZodEffects<AnyZodObject, T>;
+import { NextFunction, Request, Response } from 'express';
+import type { ZodSchema } from 'zod';
 
 export function validateBody<T>(schema: ZodSchema<T>) {
   return (req: Request, _res: Response, next: NextFunction) => {
@@ -12,14 +10,14 @@ export function validateBody<T>(schema: ZodSchema<T>) {
 
 export function validateQuery<T>(schema: ZodSchema<T>) {
   return (req: Request, _res: Response, next: NextFunction) => {
-    req.query = schema.parse(req.query);
+    req.query = schema.parse(req.query) as unknown as Request['query'];
     next();
   };
 }
 
 export function validateParams<T>(schema: ZodSchema<T>) {
   return (req: Request, _res: Response, next: NextFunction) => {
-    req.params = schema.parse(req.params);
+    req.params = schema.parse(req.params) as unknown as Request['params'];
     next();
   };
 }

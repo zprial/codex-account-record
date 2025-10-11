@@ -1,52 +1,28 @@
-import { Request, Response } from "express";
+import { Request, Response } from 'express';
 
-const stubUser = {
-  id: "user_stub_1",
-  email: "demo@example.com",
-  name: "记账小助手",
-  avatar: null,
-  createdAt: new Date().toISOString()
-};
-
-const stubTokens = {
-  accessToken: "stub-access-token",
-  refreshToken: "stub-refresh-token"
-};
+import {
+  authenticateUser,
+  registerUser,
+  rotateRefreshToken,
+  revokeRefreshToken
+} from './auth.service';
 
 export async function register(req: Request, res: Response) {
-  const { email, name } = req.body;
-
-  res.status(201).json({
-    user: {
-      ...stubUser,
-      email,
-      name
-    },
-    tokens: stubTokens
-  });
+  const result = await registerUser(req.body);
+  res.status(201).json(result);
 }
 
 export async function login(req: Request, res: Response) {
-  const { email } = req.body;
-
-  res.json({
-    user: {
-      ...stubUser,
-      email
-    },
-    tokens: stubTokens
-  });
+  const result = await authenticateUser(req.body);
+  res.json(result);
 }
 
-export async function refreshToken(_req: Request, res: Response) {
-  res.json({
-    tokens: {
-      accessToken: "stub-access-token-refreshed",
-      refreshToken: "stub-refresh-token"
-    }
-  });
+export async function refreshToken(req: Request, res: Response) {
+  const result = await rotateRefreshToken(req.body.refreshToken);
+  res.json(result);
 }
 
-export async function logout(_req: Request, res: Response) {
+export async function logout(req: Request, res: Response) {
+  await revokeRefreshToken(req.body.refreshToken);
   res.status(204).send();
 }
